@@ -1,0 +1,260 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark"> 
+  <div class="container-fluid ">
+    <span class="navbar-brand mx-auto text-center align-items-center">{{ title }}</span>
+    
+    <div class="d-flex align-items-center">
+      <span class="navbar-text me-3">
+        Welcome, {{ username }}
+      </span>
+      
+      <button class="btn btn-outline-light me-2" (click)="logout()">Logout</button>
+      
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#taskModal">
+        Add Task
+      </button>
+    </div>
+  </div>
+</nav>
+  
+
+
+<!-- heading for tasks -->
+
+<div class="col-12 mt-4  text-center">
+  <h2>Task List </h2>
+ 
+  <div class="btn-group mt-3" role="group" aria-label="Sorting buttons">
+    @if(viewtask){
+      <button (click)="exportTasksToCSV()" class="btn btn-primary">Export Tasks to CSV</button>
+    }
+    <button type="button" class="btn btn-primary" (click)="sortByDueDate()">Sort by Due Date</button>
+    <button type="button" class="btn btn-primary" (click)="sortByPriority()">Sort by Priority</button>
+    <button type="button" class="btn btn-primary" (click)="sortByStatus()">Sort by Status</button>
+    <button type="button" class="btn btn-primary" (click)="clear()">clear</button>
+  </div>
+</div>
+<div class="p-3"></div>
+
+
+@if(viewtask){
+<div class="container">
+  <div class="row">
+    <!-- Iterate over the tasks -->
+    <div class="col-md-4 mb-3" *ngFor="let i of viewtask; let idx = index;">
+      <div
+        class="card h-100"
+        [ngStyle]="{ 'border-left': '10px solid ' + (i.priority === 'high' ? 'red' : (i.priority === 'medium' ? 'yellow' : 'green')) }"
+        style="width: 18rem;"
+      >
+        <div class="card-body">
+          <h5 class="card-title">{{ i.title | uppercase }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">Description : {{ i.description }}</h6>
+          <p class="card-text">
+            <small class="text-muted">Due : {{ i.dueDate | date }}</small>
+          </p>
+          <p class="card-text">
+            <small class="text-muted">Created At : {{ i.createdAt | date }}</small>
+          </p>
+          <p class="card-text">
+            <small class="text-muted">Priority : {{ i.priority }}</small>
+          </p>
+          <span
+            class="badge"
+            [ngStyle]="{ 'background-color': i.status === 'to-do' ? 'red' : (i.status === 'in-progress' ? 'yellow' : 'green') }"
+          >
+            {{ i.status }}
+          </span>
+          <div class="mt-3">
+            <button type="button" class="btn btn-info btn-sm" (click)="openViewModal(i)">View</button>
+            <button type="button" class="btn btn-warning btn-sm"(click)="openEditModal(i)">Edit</button>
+            <button type="button" class="btn btn-danger btn-sm" (click)="delete(i._id)" >Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+}@else{
+  <div class="d-flex justify-content-center align-items-center" style="  text-align: center;">
+    <div>
+      <h1>No task found</h1>
+      <p>Please add a new task to get started.</p>
+    </div>
+  </div>
+}
+
+
+  
+  <!-- Modal  new -->
+  <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
+    <div class="modal-dialog"  [formGroup]="Taskform"  >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="taskModalLabel">Add Task</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="taskTitle" class="form-label">Title</label>
+              <input id="taskTitle" type="text" class="form-control" formControlName='title' placeholder="Title" required>
+              <div class="invalid-feedback">
+                Title is required.
+              </div>
+            </div>
+  
+            <div class="mb-3">
+              <label for="taskDescription" class="form-label">Description</label>
+              <input id="taskDescription" type="text" class="form-control"  formControlName='description' placeholder="Description">
+            </div>
+  
+            <div class="mb-3">
+              <label for="taskDueDate" class="form-label">Due Date</label>
+              <input id="taskDueDate" type="date" class="form-control" formControlName='dueDate' placeholder="Due Date" required>
+            </div>
+  
+            <div class="mb-3">
+              <label for="taskPriority" class="form-label">Priority</label>
+              <select id="taskPriority" formControlName='priority' class="form-select" required>
+                <option value="">Select Priority</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+              <div class="invalid-feedback">
+                Priority is required.
+              </div>
+            </div>
+  
+            <div class="mb-3">
+              <label for="taskStatus" class="form-label">Status</label>
+              <select id="taskStatus"  class="form-select">
+                <option value="to-do">To-Do</option>
+                <option value="in-progress">In-Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+  
+            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Close" (click)="Addtask()">
+              Add Task
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
+
+<!-- modal view -->
+
+  <div *ngIf="selectedTask" class="modal fade show" style="display: block;">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Task Details</h5>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closeViewModal()"></button>
+  
+        </div>
+        <div class="modal-body">
+          <p><strong>Title :</strong> {{ selectedTask.title }}</p>
+          <p><strong>Description :</strong> {{ selectedTask.description }}</p>
+          <p><strong>Due Date :</strong> {{ selectedTask.dueDate | date }}</p>
+          <p><strong>Priority :</strong> {{ selectedTask.priority }}</p>
+          <p><strong>Status :</strong> 
+            <select  #statusSelect value="{{selectedTask.status}}" (change)="changeTaskStatus(statusSelect.value ,selectedTask._id )">
+              <option value="to-do">To-Do</option>
+              <option value="in-progress">In-Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </p>
+          <p><strong>Created At :</strong> {{ selectedTask.createdAt | date }}</p>
+          <p><strong>Updated At :</strong> {{ selectedTask.updatedAt | date }}</p>
+          <div>
+            <h6>History Log :</h6>
+            <ul>
+              <li *ngFor="let log of selectedTask.historyLog">
+                <p><strong>Change Type :</strong> {{ log.changeType }}</p>
+                <p><strong>Timestamp :</strong> {{ log.timestamp | date }}</p>
+                <p><strong>Details :</strong> {{ log.details }}</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" (click)="closeViewModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<!-- modal edit   -->
+<div *ngIf="editedTask" class="modal fade show" style="display: block;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Task</h5>
+        <button type="button" class="btn-close"  (click)="closeEditModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form   [formGroup]="Taskform">
+          <div class="form-group">
+            <label for="editTitle">Title</label>
+            <input type="text" class="form-control" id="editTitle" value="{{editedTask.title}}" formControlName='title' name="editTitle" >
+          </div>
+          <div class="form-group">
+            <label for="editDescription">Description</label>
+            <input type="text" class="form-control" id="editDescription" value="{{editedTask.description}}" formControlName='description' name="editDescription" >
+          </div>
+          <div class="form-group">
+            <label for="editDueDate">Due Date</label>
+            <input type="date" class="form-control" [value]="(editedTask.dueDate | date: 'yyyy-MM-dd')" id="editDueDate"  name="editDueDate" >
+          </div>
+          <div class="form-group">
+            <label for="editPriority">Priority</label>
+            <select class="form-control" id="editPriority" value="{{editedTask.priority}}" formControlName="priority" name="editPriority">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editStatus">Status</label>
+            <select class="form-control" id="editStatus"  value="{{editedTask.status}}" formControlName="status"  name="editStatus">
+              <option value="to-do">To-Do</option>
+              <option value="in-progress">In-Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <button (click)='saveEditedTask()' class="btn btn-primary">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- {{newtask|json}}
+{}
+  {{alltask |json}} -->
+
+  <!-- {{editedTask|json}} -->
