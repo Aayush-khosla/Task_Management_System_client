@@ -21,11 +21,13 @@ loginpage:boolean=true;
        "email" : "aayushkhosla16@gmail.com",
       "password" :"123" 
     };
-    // constructor(){
-    //   this.logindetails.title = "Login Help"
-    //   this.logindetails.email = "aayushkhosla16@gmial.com"
-    //   this.logindetails.password = "aayush" 
-    // }
+    constructor(){
+       // this is to start the server :-> 
+      this.http.get("https://task-management-system-server-51p2.onrender.com").subscribe((res:any)=>{
+        console.log("this is to start the server");
+      })
+     
+    }
 
     Userform: FormGroup= new FormGroup({
         email: new FormControl(),
